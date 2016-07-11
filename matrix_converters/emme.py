@@ -144,7 +144,7 @@ def _from_emx(reader, zones, tall):
     data.shape = n, n
 
     if isinstance(zones, (int, np.int_)):
-        data = data[:zones, zones]
+        data = data[:zones, :zones]
 
         if tall:
             data.shape = zones * zones
