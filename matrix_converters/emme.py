@@ -28,8 +28,8 @@ def _from_mdf(file_handler, raw, tall):
     magic, version, dtype_index, ndim = np.fromfile(file_handler, np.uint32, count= 4)
 
     if magic != 0xC4D4F1B2 or version != 1 or not(0 < dtype_index <= 4) or not(0 < ndim <= 2):
-        raise IOError("Unexpected file header: magic number: %X, version:"
-                        " %d, data type: %d, dimensions: %d." %(magic, version, dtype_index, ndim))
+        raise IOError("Unexpected file header: magic number: %X, version: %d, data type: %d, dimensions: %d."
+                      % (magic, version, dtype_index, ndim))
 
     shape = np.fromfile(file_handler, np.uint32, count= ndim)
 
