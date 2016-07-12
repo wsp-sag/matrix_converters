@@ -33,3 +33,23 @@ def coerce_matrix(matrix, allow_raw=True):
 
     return matrix
 
+
+def expand_array(a, n):
+    """
+    Expands an array across all dimensions by a set amount
+
+    Args:
+        a: The array to expand
+        n: The (non-negative) number of items to expand by.
+
+    Returns: The expanded array
+    """
+
+    new_shape = [i + n for i in a.shape]
+
+    out = np.zeros(new_shape, dtype=a.dtype)
+
+    indexer = [slice(0, i) for i in a.shape]
+    out[indexer] = a
+
+    return out
