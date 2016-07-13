@@ -23,7 +23,7 @@ def from_binary_matrix(file, zones=None, tall=False):
     """
     if isinstance(file, basestring):
         with open(file, 'rb') as reader:
-            return _from_binary_matrix(reader)
+            return _from_binary_matrix(reader, zones, tall)
     return _from_binary_matrix(file, zones, tall)
 
 
@@ -98,4 +98,3 @@ def _to_binary_matrix(array, writer):
     temp[:, 0] = index_as_float
 
     temp.tofile(writer)
-

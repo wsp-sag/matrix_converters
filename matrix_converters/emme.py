@@ -176,10 +176,10 @@ def to_emx(matrix, file, emmebank_zones):
     assert emmebank_zones > 0
 
     if isinstance(file, basestring):
-        with open(file, 'rb') as writer:
-            _to_mdf(matrix, writer)
+        with open(file, 'wb') as writer:
+            _to_emx(matrix, writer, emmebank_zones)
     else:
-        _to_mdf(matrix, file)
+        _to_emx(matrix, file, emmebank_zones)
 
 
 def _to_emx(matrix, writer, max_zones):
