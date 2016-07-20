@@ -4,9 +4,83 @@ import pandas as pd
 from common import coerce_matrix
 
 
-def from_binary_matrix(file, zones=None, tall=False):
+def from_fortran_rectangle(file, n_columns, zones=None, tall=False, reindex_rows=False, fill_value=None):
     """
-    Reads a .bin file compatible with Bill Davidson's FORTRAN code
+    Reads a FORTRAN-friendly .bin file (a.k.a. 'simple binary format') which is known to NOT be square. Also works with
+    square matrices.
+
+    This file format is an array of 4-bytes, where each row is prefaced by an integer referring to the 1-based positional
+    index that FORTRAN uses. The rest of the data are in 4-byte floats. To read this, the number of columns present
+    must be known, since the format does not self-specify.
+
+    Args:
+        file(basestring or File): The file to read.
+        n_columns (int): The number of columns in the matrix.
+        zones (None or int or pandas.Index): An Index or Iterable will be interpreted as the zone labels for the matrix
+            rows and columns; returning a DataFrame or Series (depending on `tall`). If an integer is provided, the
+            returned ndarray will be truncated to this 'number of zones'.
+        tall (bool): If true, a 'tall' version of the matrix will be returned.
+        reindex_rows (bool): If true, and zones is an Index, the returned DataFrame will be reindexed to fill-in any
+            missing rows.
+        fill_value: The value to pass to pandas.reindex()
+
+    Returns:
+        ndarray or DataFrame or Series
+
+    Raises:
+        AssertionError if the shape is not valid.
+    """
+
+    if isinstance(file, basestring):
+        with open(file, 'rb') as reader:
+            return _from_fortran_binary(reader, n_columns, zones, tall, reindex_rows, fill_value)
+    return _from_fortran_binary(file, n_columns, zones, tall, reindex_rows, fill_value)
+
+
+def _from_fortran_binary(reader, n_columns, zones, tall, reindex_rows, fill_value):
+    """Lower level function"""
+    n_columns = int(n_columns)
+
+    matrix = np.fromfile(reader, dtype=np.float32)
+    rows = len(matrix) // (n_columns + 1)
+    assert len(matrix) == (rows * (n_columns + 1))
+
+    matrix.shape = rows, n_columns + 1
+    # Convert binary representation from float to int, then subtract 1 since FORTRAN uses 1-based positional indexing
+    row_index = np.frombuffer(matrix[0, :].tobytes(), dtype=np.int32) - 1
+    matrix = matrix[1:, :]
+
+    if zones is None:
+        if tall:
+            matrix.shape = matrix.shape[0] * matrix.shape[1]
+        return matrix
+
+    if isinstance(zones, (int, np.int_)):
+        matrix = matrix[: zones, :zones]
+
+        if tall:
+            matrix.shape = zones * zones
+        return matrix
+
+    matrix = matrix[:, :len(zones)]
+    row_labels = zones.take(row_index)
+    matrix = pd.DataFrame(matrix, index=row_labels, columns=zones)
+
+    if reindex_rows:
+        matrix = matrix.reindex_axis(zones, axis=0, fill_value=fill_value)
+
+    if tall:
+        return matrix.stack()
+    return matrix
+
+
+def from_fortran_square(file, zones=None, tall=False):
+    """
+    Reads a FORTRAN-friendly .bin file (a.k.a. 'simple binary format') which is known to be square.
+
+    This file format is an array of 4-bytes, where each row is prefaced by an integer referring to the 1-based positional
+    index that FORTRAN uses. The rest of the data are in 4-byte floats. To read this, the number of columns present
+    must be known, since the format does not self-specify. This method can infer the shape if it is square.
 
     Args:
         file (basestring or File): The file to read.
@@ -23,11 +97,11 @@ def from_binary_matrix(file, zones=None, tall=False):
     """
     if isinstance(file, basestring):
         with open(file, 'rb') as reader:
-            return _from_binary_matrix(reader, zones, tall)
-    return _from_binary_matrix(file, zones, tall)
+            return _from_fortran_square(reader, zones, tall)
+    return _from_fortran_square(file, zones, tall)
 
 
-def _from_binary_matrix(reader, zones, tall):
+def _from_fortran_square(reader, zones, tall):
     """Lower level function"""
     floats = np.fromfile(reader, dtype=np.float32)
     n_words = len(floats)
@@ -64,12 +138,14 @@ def _from_binary_matrix(reader, zones, tall):
 
 def _infer_zones(n_words):
     """Returns the inverse of n_words = matrix_size * (matrix_size + 1)"""
-    return int(0.5 + ((1 + 4 * n_words)**0.5)/2) - 1
+    n = int(0.5 + ((1 + 4 * n_words)**0.5)/2) - 1
+    assert n_words == (n * (n + 1)), "Could not infer a square matrix from file"
+    return n
 
 
-def to_binary_matrix(matrix, file):
+def to_fortran(matrix, file):
     """
-    Writes a matrix to .bin file compatible with Bill Davidson's FORTRAN code
+    Reads a FORTRAN-friendly .bin file (a.k.a. 'simple binary format'), in a square format.
 
     Args:
         matrix (DataFrame or Series or ndarray): The matrix to write to disk. If a Series is given, it MUST have a
@@ -81,12 +157,12 @@ def to_binary_matrix(matrix, file):
 
     if isinstance(file, basestring):
         with open(file, 'wb') as writer:
-            _to_binary_matrix(array, writer)
+            _to_fortran(array, writer)
     else:
-        _to_binary_matrix(array, file)
+        _to_fortran(array, file)
 
 
-def _to_binary_matrix(array, writer):
+def _to_fortran(array, writer):
     """Lower-level function"""
     n = array.shape[0]
     temp = np.zeros([n, n + 1], dtype=np.float32)
