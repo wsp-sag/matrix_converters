@@ -48,7 +48,7 @@ def _from_fortran_binary(reader, n_columns, zones, tall, reindex_rows, fill_valu
     matrix.shape = rows, n_columns + 1
     # Convert binary representation from float to int, then subtract 1 since FORTRAN uses 1-based positional indexing
     row_index = np.frombuffer(matrix[:, 0].tobytes(), dtype=np.int32) - 1
-    matrix = matrix[:, 1]
+    matrix = matrix[:, 1:]
 
     if zones is None:
         if tall:
