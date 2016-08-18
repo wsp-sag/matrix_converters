@@ -69,7 +69,7 @@ def to_mdf(matrix, file):
         file (basestring or File): The path or file handler to write to.
     """
     if isinstance(file, basestring):
-        with open(file, 'rb') as writer:
+        with open(file, 'wb') as writer:
             _to_mdf(matrix, writer)
     else:
         _to_mdf(matrix, file)
