@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 
-def coerce_matrix(matrix, allow_raw=True):
+def coerce_matrix(matrix, allow_raw=True, force_square=True):
     """
     Infers a NumPy array from given input
 
@@ -13,7 +13,8 @@ def coerce_matrix(matrix, allow_raw=True):
         2D ndarray of type float32
     """
     if isinstance(matrix, pd.DataFrame):
-        assert matrix.index.equals(matrix.columns)
+        if force_square:
+            assert matrix.index.equals(matrix.columns)
         return matrix.values.astype(np.float32)
     elif isinstance(matrix, pd.Series):
         assert matrix.index.nlevels == 2, "Cannot infer a matrix from a Series with more or fewer than 2 levels"
@@ -28,28 +29,36 @@ def coerce_matrix(matrix, allow_raw=True):
 
     matrix = np.array(matrix, dtype=np.float32)
     assert len(matrix.shape) == 2
-    i,j = matrix.shape
-    assert i == j
+
+    if force_square:
+        i,j = matrix.shape
+        assert i == j
 
     return matrix
 
 
-def expand_array(a, n):
+def expand_array(a, n, axis=None):
     """
     Expands an array across all dimensions by a set amount
 
     Args:
         a: The array to expand
         n: The (non-negative) number of items to expand by.
+        axis (int or None): The axis to expand along, or None to exapnd along all axes
 
     Returns: The expanded array
     """
 
-    new_shape = [i + n for i in a.shape]
+    if axis is None: new_shape = [dim + n for dim in a.shape]
+    else:
+        new_shape = []
+        for i, dim in enumerate(a.shape):
+            dim += n if i == axis else 0
+            new_shape.append(dim)
 
     out = np.zeros(new_shape, dtype=a.dtype)
 
-    indexer = [slice(0, i) for i in a.shape]
+    indexer = [slice(0, dim) for dim in a.shape]
     out[indexer] = a
 
     return out
