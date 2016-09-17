@@ -144,7 +144,7 @@ def _infer_zones(n_words):
     return n
 
 
-def to_fortran(matrix, file):
+def to_fortran(matrix, file, force_square=True, min_index=1):
     """
     Reads a FORTRAN-friendly .bin file (a.k.a. 'simple binary format'), in a square format.
 
@@ -154,22 +154,22 @@ def to_fortran(matrix, file):
         file (basestring or File): The path or file handler to write to.
 
     """
-    array = coerce_matrix(matrix)
+    array = coerce_matrix(matrix, force_square=force_square)
 
     if isinstance(file, basestring):
         with open(file, 'wb') as writer:
-            _to_fortran(array, writer)
+            _to_fortran(array, writer, min_index)
     else:
-        _to_fortran(array, file)
+        _to_fortran(array, file, min_index)
 
 
-def _to_fortran(array, writer):
+def _to_fortran(array, writer, mindex):
     """Lower-level function"""
-    n = array.shape[0]
-    temp = np.zeros([n, n + 1], dtype=np.float32)
+    rows, cols = array.shape
+    temp = np.zeros([rows, cols + 1], dtype=np.float32)
     temp[:, 1:] = array
 
-    index = np.arange(1, n+1, dtype=np.int32)
+    index = np.arange(mindex, rows + mindex, dtype=np.int32)
     # Mask the integer binary representation as floating point
     index_as_float = np.frombuffer(index.tobytes(), dtype=np.float32)
     temp[:, 0] = index_as_float
