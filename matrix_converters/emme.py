@@ -110,20 +110,20 @@ def from_emx(file, zones=None, tall=False):
     Examples:
         For a project with 20 zones:
 
-        >> matrix = from_emx("Database/emmemat/mf1.emx")
-        >> print type(matrix), matrix.shape
+        >>> matrix = from_emx("Database/emmemat/mf1.emx")
+        >>> print type(matrix), matrix.shape
         (numpy.ndarray, (20, 20))
 
-        >> matrix = from_emx("Database/emmemat/mf1.emx", zones=10)
-        >> print type(matrix), matrix.shape
+        >>> matrix = from_emx("Database/emmemat/mf1.emx", zones=10)
+        >>> print type(matrix), matrix.shape
         (numpy.ndarray, (10, 10))
 
-        >> matrix = from_emx("Database/emmemat/mf1.emx", zones=range(10))
-        >> print type(matrix), matrix.shape
+        >>> matrix = from_emx("Database/emmemat/mf1.emx", zones=range(10))
+        >>> print type(matrix), matrix.shape
         <class 'pandas.core.frame.DataFrame'> (10, 10)
 
-        >> matrix = from_emx("Database/emmemat/mf1.emx", zones=range(10), tall=True)
-        >> print type(matrix), matrix.shape
+        >>> matrix = from_emx("Database/emmemat/mf1.emx", zones=range(10), tall=True)
+        >>> print type(matrix), matrix.shape
         <class 'pandas.core.series.Series'> 100
     """
 
@@ -175,7 +175,7 @@ def to_emx(matrix, file, emmebank_zones):
         emmebank_zones (int): The number of zones the target `Emmebank` is dimensioned for.
 
     Raises:
-        AssertionError: If ``emmebank_zones`` < 0
+        AssertionError: If `emmebank_zones` < 0
     """
 
     assert emmebank_zones > 0
