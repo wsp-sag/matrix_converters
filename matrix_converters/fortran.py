@@ -5,9 +5,8 @@ from common import coerce_matrix
 
 
 def from_fortran_rectangle(file, n_columns, zones=None, tall=False, reindex_rows=False, fill_value=None):
-    """
-    Reads a FORTRAN-friendly .bin file (a.k.a. 'simple binary format') which is known to NOT be square. Also works with
-    square matrices.
+    """Reads a FORTRAN-friendly .bin file (a.k.a. 'simple binary format') which is known to NOT be square. Also works
+    with square matrices.
 
     This file format is an array of 4-bytes, where each row is prefaced by an integer referring to the 1-based positional
     index that FORTRAN uses. The rest of the data are in 4-byte floats. To read this, the number of columns present
@@ -16,19 +15,19 @@ def from_fortran_rectangle(file, n_columns, zones=None, tall=False, reindex_rows
     Args:
         file(basestring or File): The file to read.
         n_columns (int): The number of columns in the matrix.
-        zones (None or int or pandas.Index): An Index or Iterable will be interpreted as the zone labels for the matrix
-            rows and columns; returning a DataFrame or Series (depending on `tall`). If an integer is provided, the
-            returned ndarray will be truncated to this 'number of zones'.
-        tall (bool): If true, a 'tall' version of the matrix will be returned.
-        reindex_rows (bool): If true, and zones is an Index, the returned DataFrame will be reindexed to fill-in any
-            missing rows.
-        fill_value: The value to pass to pandas.reindex()
+        zones (int, pandas.Index or None, optional): Defaults to ``None``. An `Index` or `Iterable` will be interpreted
+            as the zone labels for the matrix rows and columns; returning a `DataFrame` or `Series` (depending on
+            `tall`). If an `int` is provided, the returned `ndarray` will be truncated to this 'number of zones'.
+        tall (bool, optional): Defaults to ``False``. If ``True``, a 'tall' version of the matrix will be returned.
+        reindex_rows (bool, optional): Defaults to ``False``. If ``True``, and zones is an `Index`, the returned
+            `DataFrame` will be reindexed to fill-in any missing rows.
+        fill_value (int or float, optional): Defaults to ``None``. The value to pass to ``pandas.reindex()``
 
     Returns:
-        ndarray or DataFrame or Series
+        ndarray, DataFrame or Series: A matrix from a FORTRAN-friendly .bin file that is known to not be square.
 
     Raises:
-        AssertionError if the shape is not valid.
+        AssertionError: if the shape is not valid.
     """
 
     if isinstance(file, basestring):
@@ -76,8 +75,7 @@ def _from_fortran_binary(reader, n_columns, zones, tall, reindex_rows, fill_valu
 
 
 def from_fortran_square(file, zones=None, tall=False):
-    """
-    Reads a FORTRAN-friendly .bin file (a.k.a. 'simple binary format') which is known to be square.
+    """Reads a FORTRAN-friendly .bin file (a.k.a. 'simple binary format') which is known to be square.
 
     This file format is an array of 4-bytes, where each row is prefaced by an integer referring to the 1-based positional
     index that FORTRAN uses. The rest of the data are in 4-byte floats. To read this, the number of columns present
@@ -85,17 +83,17 @@ def from_fortran_square(file, zones=None, tall=False):
 
     Args:
         file (basestring or File): The file to read.
-        zones (Index or int or None): An Index or Iterable will be interpreted as the zone labels for the matrix rows
-            and columns; returning a DataFrame or Series (depending on `tall`). If an integer is provided, the returned
-            ndarray will be truncated to this 'number of zones'. Otherwise, the returned ndarray will be size to the
-            maximum number of zone dimensioned by the Emmebank.
-        tall (bool):  If True, a 1D data structure will be returned. If `zone_index` is provided, a Series will be
-            returned, otherwise a 1D ndarray.
+        zones (Index, int or None, optional): Defaults to ``None``. An `Index` or `Iterable` will be interpreted as the
+            zone labels for the matrix rows and columns; returning a `DataFrame` or `Series` (depending on `tall`). If
+            an `int` is provided, the returned `ndarray` will be truncated to this 'number of zones'. Otherwise, the
+            returned `ndarray` will be size to the maximum number of zone dimensioned by the `Emmebank`.
+        tall (bool, optional): Defaults to ``False``. If ``True``, a 1D data structure will be returned. If `zone_index`
+            is provided, a Series will be returned, otherwise a 1D ndarray.
 
     Returns:
-        DataFrame or ndarray
-
+        DataFrame or ndarray: A matrix from a FORTRAN-friendly .bin file that is known to be square.
     """
+
     if isinstance(file, basestring):
         with open(file, 'rb') as reader:
             return _from_fortran_square(reader, zones, tall)
@@ -145,13 +143,14 @@ def _infer_zones(n_words):
 
 
 def to_fortran(matrix, file, force_square=True, min_index=1):
-    """
-    Reads a FORTRAN-friendly .bin file (a.k.a. 'simple binary format'), in a square format.
+    """Writes a FORTRAN-friendly .bin file (a.k.a. 'simple binary format'), in a square format.
 
     Args:
-        matrix (DataFrame or Series or ndarray): The matrix to write to disk. If a Series is given, it MUST have a
-            MultiIndex with exactly 2 levels to unstack.
+        matrix (DataFrame, Series or ndarray): The matrix to write to disk. If a `Series` is given, it MUST have a
+            `MultiIndex` with exactly 2 levels to unstack.
         file (basestring or File): The path or file handler to write to.
+        force_square (bool, optional): Defaults to ``True``.
+        min_index (int): Defaults to ``1``.
 
     """
     array = coerce_matrix(matrix, force_square=force_square)

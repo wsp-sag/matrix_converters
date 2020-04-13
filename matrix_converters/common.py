@@ -3,14 +3,15 @@ import pandas as pd
 
 
 def coerce_matrix(matrix, allow_raw=True, force_square=True):
-    """
-    Infers a NumPy array from given input
+    """Infers a NumPy array from given input.
 
     Args:
-        matrix (DataFrame or Series or ndarray or Iterable):
+        matrix (DataFrame, Series, ndarray or Iterable):
+        allow_raw (bool, optional): Defaults to ``True``.
+        force_square (bool, optional): Defaults to ``True``.
 
     Returns:
-        2D ndarray of type float32
+        ndarray: A 2D `np.ndarray` of type `float32`
     """
     if isinstance(matrix, pd.DataFrame):
         if force_square:
@@ -31,25 +32,26 @@ def coerce_matrix(matrix, allow_raw=True, force_square=True):
     assert len(matrix.shape) == 2
 
     if force_square:
-        i,j = matrix.shape
+        i, j = matrix.shape
         assert i == j
 
     return matrix
 
 
 def expand_array(a, n, axis=None):
-    """
-    Expands an array across all dimensions by a set amount
+    """Expands an array across all dimensions by a set amount.
 
     Args:
         a: The array to expand
         n: The (non-negative) number of items to expand by.
-        axis (int or None): The axis to expand along, or None to exapnd along all axes
+        axis (int or None, optional): The axis to expand along, or ``None`` to expand along all axes
 
-    Returns: The expanded array
+    Returns:
+        array: The expanded array
     """
 
-    if axis is None: new_shape = [dim + n for dim in a.shape]
+    if axis is None:
+        new_shape = [dim + n for dim in a.shape]
     else:
         new_shape = []
         for i, dim in enumerate(a.shape):
