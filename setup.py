@@ -1,11 +1,17 @@
 from setuptools import setup, find_packages
 
-setup(name="matrix_converters",
-      description="Converters for various matrix file formats used by travel demand forecasting models.",
-      version="1.0",
-      author="Peter Kucirek",
-      author_email="pkucirek@pbworld.com",
-      packages=find_packages(),
-      requires=[ "numpy", "pandas"],
-      platforms="any"
-      )
+setup(
+    name="matrix_converters",
+    description="Converters for various matrix file formats used by travel demand forecasting models",
+    author="WSP",
+    maintainer="Brian Cheung",
+    maintainer_email="brian.cheung@wsp.com",
+    version="1.1",
+    packages=find_packages(),
+    install_requires=[
+        "numpy",
+        "pandas",
+        "six"
+    ],
+    platforms="any"
+)

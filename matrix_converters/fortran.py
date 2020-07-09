@@ -1,16 +1,17 @@
 import numpy as np
 import pandas as pd
+from six import string_types
 
-from common import coerce_matrix
+from .common import coerce_matrix
 
 
 def from_fortran_rectangle(file, n_columns, zones=None, tall=False, reindex_rows=False, fill_value=None):
     """Reads a FORTRAN-friendly .bin file (a.k.a. 'simple binary format') which is known to NOT be square. Also works
     with square matrices.
 
-    This file format is an array of 4-bytes, where each row is prefaced by an integer referring to the 1-based positional
-    index that FORTRAN uses. The rest of the data are in 4-byte floats. To read this, the number of columns present
-    must be known, since the format does not self-specify.
+    This file format is an array of 4-bytes, where each row is prefaced by an integer referring to the 1-based
+    positional index that FORTRAN uses. The rest of the data are in 4-byte floats. To read this, the number of columns
+    present must be known, since the format does not self-specify.
 
     Args:
         file(basestring or File): The file to read.
@@ -30,7 +31,7 @@ def from_fortran_rectangle(file, n_columns, zones=None, tall=False, reindex_rows
         AssertionError: if the shape is not valid.
     """
 
-    if isinstance(file, basestring):
+    if isinstance(file, string_types):
         with open(file, 'rb') as reader:
             return _from_fortran_binary(reader, n_columns, zones, tall, reindex_rows, fill_value)
     return _from_fortran_binary(file, n_columns, zones, tall, reindex_rows, fill_value)
@@ -77,9 +78,9 @@ def _from_fortran_binary(reader, n_columns, zones, tall, reindex_rows, fill_valu
 def from_fortran_square(file, zones=None, tall=False):
     """Reads a FORTRAN-friendly .bin file (a.k.a. 'simple binary format') which is known to be square.
 
-    This file format is an array of 4-bytes, where each row is prefaced by an integer referring to the 1-based positional
-    index that FORTRAN uses. The rest of the data are in 4-byte floats. To read this, the number of columns present
-    must be known, since the format does not self-specify. This method can infer the shape if it is square.
+    This file format is an array of 4-bytes, where each row is prefaced by an integer referring to the 1-based
+    positional index that FORTRAN uses. The rest of the data are in 4-byte floats. To read this, the number of columns
+    present must be known, since the format does not self-specify. This method can infer the shape if it is square.
 
     Args:
         file (basestring or File): The file to read.
@@ -94,7 +95,7 @@ def from_fortran_square(file, zones=None, tall=False):
         DataFrame or ndarray: A matrix from a FORTRAN-friendly .bin file that is known to be square.
     """
 
-    if isinstance(file, basestring):
+    if isinstance(file, string_types):
         with open(file, 'rb') as reader:
             return _from_fortran_square(reader, zones, tall)
     return _from_fortran_square(file, zones, tall)
@@ -155,7 +156,7 @@ def to_fortran(matrix, file, force_square=True, min_index=1):
     """
     array = coerce_matrix(matrix, force_square=force_square)
 
-    if isinstance(file, basestring):
+    if isinstance(file, string_types):
         with open(file, 'wb') as writer:
             _to_fortran(array, writer, min_index)
     else:

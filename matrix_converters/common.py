@@ -1,5 +1,8 @@
 import numpy as np
 import pandas as pd
+from pkg_resources import parse_version
+
+LEGACY_PANDAS = parse_version(pd.__version__) < parse_version('0.24')
 
 
 def coerce_matrix(matrix, allow_raw=True, force_square=True):
@@ -16,14 +19,16 @@ def coerce_matrix(matrix, allow_raw=True, force_square=True):
     if isinstance(matrix, pd.DataFrame):
         if force_square:
             assert matrix.index.equals(matrix.columns)
-        return matrix.values.astype(np.float32)
+        matrix_values = matrix.values if LEGACY_PANDAS else matrix.to_numpy(copy=True)
+        return matrix_values.astype(np.float32)
     elif isinstance(matrix, pd.Series):
         assert matrix.index.nlevels == 2, "Cannot infer a matrix from a Series with more or fewer than 2 levels"
         wide = matrix.unstack()
 
         union = wide.index | wide.columns
         wide = wide.reindex_axis(union, fill_value=0.0, axis=0).reindex_axis(union, fill_value=0.0, axis=1)
-        return wide.values.astype(np.float32)
+        wide = wide.values if LEGACY_PANDAS else wide.to_numpy(copy=True)
+        return wide.astype(np.float32)
 
     if not allow_raw:
         raise NotImplementedError()
